@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Factory Defense — башенная оборона с фабрикой</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ГЛАВНОЕ МЕНЮ -->
+  <div id="screen-menu" class="screen">
+    <div class="game-title">FACTORY DEFENSE</div>
+    <div class="game-sub">Конвейеры · Ресурсы · Турели · 30 волн</div>
+    <div class="menu-btns">
+      <button id="mm-new" class="btn-accent">▶ Новая игра</button>
+      <button id="mm-continue">Продолжить (автосейв)</button>
+      <button id="mm-load">Загрузить игру</button>
+      <button id="mm-settings">Настройки</button>
+      <button id="mm-help">Управление и справка</button>
+    </div>
+  </div>
+
+  <!-- ВЫБОР КАРТЫ -->
+  <div id="screen-maps" class="screen hidden">
+    <div class="game-title" style="font-size:28px">ВЫБОР КАРТЫ</div>
+    <div class="game-sub">Каждая карта — свой рельеф и точки атаки</div>
+    <div id="diff-row" class="diff-row"></div>
+    <div id="maps-grid" class="maps-grid"></div>
+    <div style="margin-top:20px"><button id="btn-back-maps">← Назад</button></div>
+  </div>
+
+  <!-- ИГРА -->
+  <div id="screen-game" class="hidden">
+    <div id="hud">
+      <div class="res-group">
+        <div class="res-item"><span class="ic">⬛</span> <b id="hud-iron">0</b></div>
+        <div class="res-item"><span class="ic">🟧</span> <b id="hud-copper">0</b></div>
+        <div class="res-item"><span class="ic">◼</span> <b id="hud-coal">0</b></div>
+        <div class="res-item"><span class="ic">🔷</span> <b id="hud-crystal">0</b></div>
+        <div class="res-item"><span class="ic">🔬</span> <b id="hud-science">0</b></div>
+        <div class="res-item"><span class="ic">🍞</span> <b id="hud-food">0</b></div>
+      </div>
+      <div id="hud-pop" class="res-item" title="Население / рабочие и занятость">👷 6/6</div>
+      <div class="core-bar-wrap">
+        <span>🛡</span>
+        <div class="core-bar"><div id="core-bar-fill" class="core-bar-fill"></div></div>
+        <span id="core-hp-text" style="font-size:11px;color:var(--muted)"></span>
+      </div>
+      <div class="spacer"></div>
+      <div>
+        <div id="wave-info">Волна: <span id="hud-wave">0</span></div>
+        <div id="wave-timer-info"><span id="hud-wave-timer"></span></div>
+        <div id="wave-preview" style="font-size:10px;color:#8a94aa;max-width:260px"></div>
+      </div>
+      <button id="btn-call-wave" class="hud-btn btn-accent">⚔ Волна сейчас (+ресурсы)</button>
+      <button id="btn-speed" class="hud-btn">⏩ 1×</button>
+      <button id="btn-pause" class="hud-btn">⏸ Пауза</button>
+    </div>
+
+    <div id="workspace">
+      <div id="build-panel">
+        <div id="build-cats"></div>
+        <div id="build-list"></div>
+      </div>
+      <div id="canvas-wrap">
+        <canvas id="game-canvas"></canvas>
+        <div id="quest-panel">
+          <div id="quest-title">📋 ОБУЧЕНИЕ</div>
+          <div id="quest-list"></div>
+        </div>
+      </div>
+      <div id="info-panel">
+        <div id="info-content"></div>
+        <div id="panel-btns">
+          <button id="btn-research">🔬 Исследования</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="hint-bar">
+      <span id="hint-text">ЛКМ — поставить · ПКМ — снести/отмена · R — повернуть · F — вызвать волну · Space — пауза · 1/2/3 — скорость · X — продать выбранное</span>
+    </div>
+  </div>
+
+  <!-- МОДАЛКА: ПАУЗА -->
+  <div id="modal-pause" class="modal-back hidden">
+    <div class="modal">
+      <h2>⏸ ПАУЗА</h2>
+      <p>Игра остановлена. Спокойно планируй фабрику.</p>
+      <div class="row">
+        <button id="btn-open-saves">💾 Сохранения</button>
+        <button id="btn-open-settings">⚙ Настройки</button>
+        <button id="btn-open-help">📖 Управление</button>
+        <button id="btn-to-menu">В главное меню</button>
+        <button id="btn-resume" class="btn-accent">▶ Продолжить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- МОДАЛКА: ИССЛЕДОВАНИЯ -->
+  <div id="modal-research" class="modal-back hidden">
+    <div class="modal" style="width:min(860px,94vw)">
+      <h2>🔬 ИССЛЕДОВАНИЯ</h2>
+      <p>Нау-пакеты производятся в Лаборатории: 2 железа + 2 меди + 1 кристалл → 1 пакет.</p>
+      <div id="research-grid" class="research-grid"></div>
+      <div class="row">
+        <button id="btn-close-research" class="btn-accent">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- МОДАЛКА: СОХРАНЕНИЯ -->
+  <div id="modal-saves" class="modal-back hidden">
+    <div class="modal">
+      <h2>💾 СОХРАНЕНИЯ</h2>
+      <div id="saves-list"></div>
+      <div class="row">
+        <button id="btn-close-saves" class="btn-accent">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- МОДАЛКА: НАСТРОЙКИ -->
+  <div id="modal-settings" class="modal-back hidden">
+    <div class="modal">
+      <h2>⚙ НАСТРОЙКИ</h2>
+      <div class="settings-row">
+        <input type="checkbox" id="set-sfx" checked>
+        <label for="set-sfx">Звуковые эффекты</label>
+      </div>
+      <div class="settings-row">
+        <input type="checkbox" id="set-music">
+        <label for="set-music">Музыка (чиптюн-луп)</label>
+      </div>
+      <div class="row">
+        <button id="btn-close-settings" class="btn-accent">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- МОДАЛКА: СПРАВКА -->
+  <div id="modal-help" class="modal-back hidden">
+    <div class="modal">
+      <h2>📖 УПРАВЛЕНИЕ</h2>
+      <div class="help-line">🏭 <b>Цикл игры:</b> шахта добывает руду → конвейер везёт в плавильню → слитки идут в цеха → боеприпасы в депо → депо кормит турели.</div>
+      <div class="help-line">⬛ Слитки, уголь, кристаллы и нау-пакеты отправляйте конвейером в <b>ядро</b> — это ваш склад.</div>
+      <div class="help-line">🐀 Враги идут к ядру. Полностью перекрыть путь нельзя — игра подскажет.</div>
+      <div class="help-line"><kbd>ЛКМ</kbd> поставить/выбрать · <kbd>ПКМ</kbd> снести/отмена · <kbd>R</kbd> повернуть · <kbd>F</kbd> волна сейчас</div>
+      <div class="help-line"><kbd>Space</kbd> пауза · <kbd>Esc</kbd> меню · <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> скорость · <kbd>X</kbd> продать выбранное</div>
+      <div class="help-line"><kbd>Q</kbd> шахта · <kbd>W</kbd> лента · <kbd>E</kbd> сплиттер · <kbd>T</kbd> депо · <kbd>S</kbd> плавильня · <kbd>A</kbd> патронный цех</div>
+      <div class="help-line"><kbd>G</kbd> пулемёт · <kbd>C</kbd> пушка · <kbd>N</kbd> лазер · <kbd>V</kbd> стена</div>
+      <div class="row">
+        <button id="btn-close-help" class="btn-accent">Понятно!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ПОРАЖЕНИЕ -->
+  <div id="overlay-gameover" class="overlay hidden">
+    <div class="overlay-box">
+      <h1>ЯДРО УНИЧТОЖЕНО</h1>
+      <div class="overlay-stats" id="go-stats"></div>
+      <div class="row">
+        <button id="btn-retry" class="btn-accent">↻ Ещё раз</button>
+        <button id="btn-go-menu">В меню</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ПОБЕДА -->
+  <div id="overlay-victory" class="overlay hidden">
+    <div class="overlay-box">
+      <h1>🏆 ПОБЕДА!</h1>
+      <div class="overlay-stats" id="vic-stats"></div>
+      <div class="row">
+        <button id="btn-endless" class="btn-accent">∞ Бесконечный режим</button>
+        <button id="btn-go-menu2">В меню</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ТОСТ -->
+  <div id="toast" class="hidden"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/sprites.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/sim.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

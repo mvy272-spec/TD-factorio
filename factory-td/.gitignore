@@ -1,0 +1,4 @@
+# Generated single-file release build; upload this artifact to a GitHub Release.
+dist/
+__pycache__/
+*.py[cod]
